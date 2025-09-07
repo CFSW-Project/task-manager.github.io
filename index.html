@@ -866,16 +866,12 @@
                 this.tasks = [];
                 this.taskIdCounter = 1;
                 this.currentView = 'all';
-                this.isOnline = false;
                 this.animationActive = false;
                 
                 this.loadTasks();
                 this.setupEventListeners();
                 this.render();
-                this.updateStatus('offline', 'Local storage only');
-                
-                // Try Firebase initialization
-                this.initFirebase();
+                this.updateStatus('online', 'Local storage');
             }
 
             setupEventListeners() {
@@ -920,11 +916,6 @@
                 this.render();
                 input.value = '';
 
-                // Try to save to Firebase
-                if (this.isOnline) {
-                    this.saveTaskToFirebase(task);
-                }
-
                 console.log('Task added:', task);
             }
 
@@ -939,10 +930,6 @@
                     if (task.completed) {
                         this.triggerAnimation();
                     }
-                    
-                    if (this.isOnline) {
-                        this.saveTaskToFirebase(task);
-                    }
                 }
             }
 
@@ -950,10 +937,6 @@
                 this.tasks = this.tasks.filter(t => t.id !== taskId);
                 this.saveTasks();
                 this.render();
-                
-                if (this.isOnline) {
-                    this.deleteTaskFromFirebase(taskId);
-                }
             }
 
             setView(view) {
@@ -1091,41 +1074,6 @@
                 const container = document.getElementById('errorContainer');
                 container.innerHTML = `<div class="error">${message}</div>`;
                 setTimeout(() => container.innerHTML = '', 5000);
-            }
-
-            // Firebase methods (simplified)
-            async initFirebase() {
-                try {
-                    // This will probably fail, but won't break the app
-                    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js");
-                    
-                    const firebaseConfig = {
-                        apiKey: "AIzaSyCr1_1VYsDBXLIIzA_Skbst43DCLQsUkcA",
-                        authDomain: "task-manager-7a145.firebaseapp.com",
-                        projectId: "task-manager-7a145",
-                        storageBucket: "task-manager-7a145.appspot.com",
-                        messagingSenderId: "650520260802",
-                        appId: "1:650520260802:web:0d2cbc933f5642a0b2cb5b"
-                    };
-
-                    this.app = initializeApp(firebaseConfig);
-                    this.updateStatus('online', 'Connected to cloud');
-                    this.isOnline = true;
-                    
-                } catch (error) {
-                    console.log('Firebase unavailable:', error.message);
-                    this.updateStatus('offline', 'Local storage only');
-                }
-            }
-
-            async saveTaskToFirebase(task) {
-                // Placeholder - would implement actual Firebase save
-                console.log('Would save to Firebase:', task);
-            }
-
-            async deleteTaskFromFirebase(taskId) {
-                // Placeholder - would implement actual Firebase delete
-                console.log('Would delete from Firebase:', taskId);
             }
 
             triggerAnimation() {
